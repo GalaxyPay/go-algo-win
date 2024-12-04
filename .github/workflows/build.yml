@@ -1,0 +1,31 @@
+name: Build
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  msys2-ucrt64:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: git unzip mingw-w64-ucrt-x86_64-gcc
+      - name: CI-Build
+        run: |
+          echo 'Running in MSYS2!'
+          ./ci-build.sh
+      - name: Prepare version file
+        run: echo $GITHUB_SHA > version
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v3.27.0-stable
+          artifacts: "node.tar.gz"
