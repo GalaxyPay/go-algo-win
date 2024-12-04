@@ -14,6 +14,7 @@ cd go-algorand
 ./scripts/configure_dev.sh
 make install
 
+mkdir $MYPWD/bin
 cd ~/go/bin
 cp algocfg.exe algod.exe algokey.exe carpenter.exe diagcfg.exe goal.exe kmd.exe msgpacktool.exe $MYPWD/bin/
 cd $MYPWD
