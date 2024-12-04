@@ -1,3 +1,5 @@
+ls -la ~
+
 wget -q https://go.dev/dl/go1.22.3.windows-amd64.zip
 unzip -q go1.22.3.windows-amd64.zip
 
@@ -12,8 +14,12 @@ cd go-algorand
 ./scripts/configure_dev.sh
 make install
 
+ls -la ~
 cd ~/go/bin
-mkdir ~/bin
+ls -la
 cp algocfg.exe algod.exe algokey.exe carpenter.exe diagcfg.exe goal.exe kmd.exe msgpacktool.exe ~/bin
 cd ~
+ls -la
+ls -la bin
 tar -czf node.tar.gz bin
+ls -la
