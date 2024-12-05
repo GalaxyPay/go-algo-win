@@ -27,5 +27,5 @@ jobs:
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          tag: v3.27.0-stable
+          tag: fnet3
           artifacts: "node.tar.gz"
