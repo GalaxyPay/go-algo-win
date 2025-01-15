@@ -27,5 +27,5 @@ jobs:
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          tag: v3.27.0-stable
+          tag: v4.0.1-stable
           artifacts: "node.tar.gz"
