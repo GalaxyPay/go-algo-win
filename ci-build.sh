@@ -16,6 +16,6 @@ make install
 
 mkdir $MYPWD/bin
 cd ~/go/bin
-cp algocfg.exe algod.exe algokey.exe carpenter.exe diagcfg.exe goal.exe kmd.exe msgpacktool.exe $MYPWD/bin/
+cp algocfg.exe algod.exe algokey.exe carpenter.exe diagcfg.exe goal.exe kmd.exe msgpacktool.exe netgoal.exe $MYPWD/bin/
 cd $MYPWD
 tar -czf node.tar.gz bin
