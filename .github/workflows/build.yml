@@ -27,6 +27,6 @@ jobs:
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          tag: v4.7.4-stable
+          tag: v5.0.0-stable
           artifacts: "node.tar.gz"
           immutableCreate: true
