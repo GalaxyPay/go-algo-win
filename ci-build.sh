@@ -1,3 +1,5 @@
+set -e
+
 MYPWD=$(pwd)
 
 wget -q https://go.dev/dl/go1.25.4.windows-amd64.zip
@@ -11,6 +13,7 @@ git submodule init
 git submodule update
 
 cd go-algorand
+sed -i "s/mingw-w64-x86_64-/mingw-w64-ucrt-x86_64-/g" scripts/configure_dev.sh
 ./scripts/configure_dev.sh
 make install
 
