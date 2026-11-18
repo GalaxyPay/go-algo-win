@@ -24,9 +24,15 @@ jobs:
           ./ci-build.sh
       - name: Prepare version file
         run: echo $GITHUB_SHA > version
+      - name: Determine go-algorand tag
+        id: algod
+        run: |
+          TAG=$(git -C go-algorand describe --tags --exact-match)
+          echo "Using go-algorand tag: $TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          tag: v5.0.5-stable
+          tag: ${{ steps.algod.outputs.tag }}
           artifacts: "node.tar.gz"
           immutableCreate: true

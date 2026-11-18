@@ -1,0 +1,59 @@
+name: Bump go-algorand
+on:
+  schedule:
+    - cron: "*/10 * * * *" # every 10 minutes
+  workflow_dispatch:
+
+concurrency:
+  group: bump-go-algorand
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Find latest -stable tag
+        id: latest
+        run: |
+          REMOTE=https://github.com/algorand/go-algorand.git
+          TAG=$(git ls-remote --tags --refs "$REMOTE" 'v*-stable' \
+            | awk '{print $2}' | sed 's#refs/tags/##' \
+            | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+-stable$' \
+            | sort -V | tail -n1)
+          # Resolve to a commit SHA (peels annotated tags if they're ever used)
+          SHA=$(git ls-remote "$REMOTE" "refs/tags/$TAG^{}" | awk '{print $1}')
+          [ -n "$SHA" ] || SHA=$(git ls-remote "$REMOTE" "refs/tags/$TAG" | awk '{print $1}')
+          CURRENT=$(git ls-tree HEAD go-algorand | awk '{print $3}')
+          echo "Latest: $TAG ($SHA), current submodule: $CURRENT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          if [ "$SHA" != "$CURRENT" ]; then echo "update=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Open PR
+        if: steps.latest.outputs.update == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.latest.outputs.tag }}
+          SHA: ${{ steps.latest.outputs.sha }}
+        run: |
+          BRANCH="bump/go-algorand-$TAG"
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null; then
+            echo "Branch $BRANCH already exists; skipping."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git update-index --cacheinfo "160000,$SHA,go-algorand"
+          git commit -m "$TAG"
+          git push origin "$BRANCH"
+          gh pr create \
+            --base main --head "$BRANCH" \
+            --title "Bump go-algorand to $TAG" \
+            --body "Updates the go-algorand submodule to [$TAG](https://github.com/algorand/go-algorand/releases/tag/$TAG). Merging will build and publish the $TAG release."
