@@ -22,8 +22,6 @@ jobs:
         run: |
           echo 'Running in MSYS2!'
           ./ci-build.sh
-      - name: Prepare version file
-        run: echo $GITHUB_SHA > version
       - name: Checksum
         # FUNC checks node.tar.gz against this before installing it.
         run: sha256sum node.tar.gz | tee node.tar.gz.sha256
@@ -33,9 +31,36 @@ jobs:
           TAG=$(git -C go-algorand describe --tags --exact-match)
           echo "Using go-algorand tag: $TAG"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+      - name: Write release notes
+        env:
+          TAG: ${{ steps.algod.outputs.tag }}
+        run: |
+          ALGOD_SHA=$(git -C go-algorand rev-parse HEAD)
+          SUM=$(cut -d' ' -f1 node.tar.gz.sha256)
+          cat > release-notes.md <<EOF
+          Unofficial Windows (x86_64) build of [algorand/go-algorand **$TAG**](https://github.com/algorand/go-algorand/releases/tag/$TAG).
+
+          The binaries in this release are compiled, unmodified, from the go-algorand source at commit [\`${ALGOD_SHA:0:12}\`](https://github.com/algorand/go-algorand/commit/$ALGOD_SHA). This repository only adds the Windows build pipeline — **for the changelog, protocol upgrades, and any upgrade instructions, read the official release notes:**
+
+          👉 https://github.com/algorand/go-algorand/releases/tag/$TAG
+
+          ### Contents
+
+          \`node.tar.gz\` contains a \`bin/\` folder with: \`algod.exe\`, \`goal.exe\`, \`kmd.exe\`, \`algokey.exe\`, \`algocfg.exe\`, \`diagcfg.exe\`, \`catchpointdump.exe\`, \`msgpacktool.exe\`, \`netgoal.exe\`.
+
+          ### Verify
+
+          SHA-256 of \`node.tar.gz\`:
+          \`\`\`
+          $SUM
+          \`\`\`
+          EOF
+          cat release-notes.md
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.algod.outputs.tag }}
+          name: ${{ steps.algod.outputs.tag }} (Windows)
+          bodyFile: release-notes.md
           artifacts: "node.tar.gz,node.tar.gz.sha256"
           immutableCreate: true
