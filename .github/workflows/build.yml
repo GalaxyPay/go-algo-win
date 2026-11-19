@@ -24,6 +24,9 @@ jobs:
           ./ci-build.sh
       - name: Prepare version file
         run: echo $GITHUB_SHA > version
+      - name: Checksum
+        # FUNC checks node.tar.gz against this before installing it.
+        run: sha256sum node.tar.gz | tee node.tar.gz.sha256
       - name: Determine go-algorand tag
         id: algod
         run: |
@@ -34,5 +37,5 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.algod.outputs.tag }}
-          artifacts: "node.tar.gz"
+          artifacts: "node.tar.gz,node.tar.gz.sha256"
           immutableCreate: true
