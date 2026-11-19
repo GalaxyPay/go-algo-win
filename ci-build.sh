@@ -14,6 +14,8 @@ git submodule update
 
 cd go-algorand
 sed -i "s/mingw-w64-x86_64-/mingw-w64-ucrt-x86_64-/g" scripts/configure_dev.sh
+# MSYS2 has no "procps" package; it's "procps-ng"
+sed -i -E "s/ procps( |;|$)/ procps-ng\1/" scripts/configure_dev.sh
 ./scripts/configure_dev.sh
 BRANCH=rel/stable make install
 
